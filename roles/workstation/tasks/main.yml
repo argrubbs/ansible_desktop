@@ -41,7 +41,7 @@
 
 - name: Install vscode packages
   ansible.builtin.dnf:
-    name: vscode
+    name: code
     state: present
     update_cache: true
 
