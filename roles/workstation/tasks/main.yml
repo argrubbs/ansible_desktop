@@ -17,7 +17,7 @@
 - name: install github python module
   ansible.builtin.pip:
     name:
-      - "github3.py"
+      - "github3.py>=1.0.0a3"
     state: present
     executable: /usr/bin/pip3
 
