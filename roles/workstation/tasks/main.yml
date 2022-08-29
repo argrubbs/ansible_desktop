@@ -12,6 +12,8 @@
       - kernel-devel
       - mpv
       - flatpak
+      - cronie
+      - cronie-anacron
     state: present
 
 ### Install github python module
