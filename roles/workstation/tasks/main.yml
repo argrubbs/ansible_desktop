@@ -10,7 +10,6 @@
       - tmux
       - vim
       - kernel-devel
-      - mpv
       - flatpak
       - cronie
       - cronie-anacron
