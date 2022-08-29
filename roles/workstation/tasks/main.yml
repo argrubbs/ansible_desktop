@@ -1,0 +1,160 @@
+---
+
+### Install packages
+
+- name: Install python3-pip
+  ansible.builtin.package:
+    name:
+      - python3-pip
+      - tmux
+      - vim
+      - kernel-devel
+      - mpv
+    state: present
+
+### Install github python module
+
+- name: install github python module
+  ansible.builtin.pip:
+    version: 3
+    name:
+      - "github3.py>=1.0.0.a3"
+    state: present
+
+### Install vscode
+
+- name: Install MS RPM key
+  ansible.builtin.rpm_key:
+    key: "https://packages.microsoft.com/keys/microsoft.asc"
+    state: present
+
+- name: Add MS VSCode RPM repo
+  ansible.builtin.yum_repository:
+    name: vscode
+    baseurl:
+      - "https://packages.microsoft.com/yumrepos/vscode"
+    enabled: true
+    gpgcheck: true
+    gpgkey:
+      - "https://packages.microsoft.com/keys/microsoft.asc"
+
+- name: Install vscode packages
+  ansible.builtin.dnf:
+    name: vscode
+    state: present
+    update_cache: true
+
+### Install Microsoft Teams
+- name: Add MS Teams RPM Repo
+  ansible.builtin.yum_repository:
+    name: ms-teams
+    baseurl:
+      - "https://packages.microsoft.com/yumrepos/ms-teams"
+    enabled: true
+    gpgcakey: true
+    gpgkey:
+      - "https://packages.microsoft.com/keys/microsoft.asc"
+
+- name: Install MS Teams RPM
+  ansible.builtin.dnf:
+    name: teams
+    state: present
+    update_cache: true
+
+### Install git credential manager
+
+- name: get latest gcm core binary version
+  community.general.github_release:
+    repo: git-credentials-manager
+    user: GitCredentialManager
+    action: latest_release
+  register: gcm_latest
+
+- name: Download latest gcm core binary
+  ansible.builtin.unarchive:
+    src: "https://github.com/GitCredentialManager/git-credential-manager/releases/download/{{ gcm_latest['tag'] }}/gcm-linux_amd64{{ gcm_latest['tag'] | regex_replace('^v','') }}.tar.gz"
+    dest: /usr/local/bin/
+    remote_src: true
+
+- name: Configure GCM Core
+  ansible.builtin.command:
+    cmd: git-credential-manager-core configure
+
+### Install Flatpak and Flathub
+
+- name: Install Flatpak
+  ansible.builtin.dnf:
+    name: Flatpak
+    state: present
+
+- name: Install Flathub
+  community.general.flatpak_remote:
+    name: flathub
+    flatpakrepo_url: "https://flathub.org/repo/flathub.flatpakrepo"
+    state: present
+
+### Install most-used Flatpaks
+
+- name: Install Desktop Flatpaks
+  community.general.flatpak:
+    name:
+      - org.telegram.desktop
+      - tv.plex.PlexDesktop
+      - com.discordapp.discord
+      - com.mattermost.Desktop
+      - us.zoom.Zoom
+      - com.mattjakeman.ExtensionManager
+    remote: flathub
+    method: user
+    state: present
+
+### Set mpv config
+
+- name: Set HWDEC in mpv config
+  become_user: adam
+  ansible.builtin.template:
+    src: "mpv.conf.j2"
+    dest: "~/.config/mpv/mpv.conf"
+
+### Set wallpaper
+
+- name: Copy wallpaper
+  ansible.builtin.copy:
+    src: "wallpaper.jpg"
+    dest: /usr/share/backgrounds/ansible-wallpaper.jpg
+    owner: root
+    group: root
+
+- name: Set wallpaper
+  become_user: adam
+  ansible.builtin.dconf:
+    key: "/org/gnome/desktop/background/picture-uri"
+    value: "'file:///usr/share/backgrounds/ansible-wallpaper.jpg'"
+
+- name: set wallpaper position
+  become_user: adam
+  ansible.builtin.dconf:
+    key: "/org/gnome/desktop/background/picture-options"
+    value: "'zoom'"
+
+  ### Add ansible-pull automation
+
+- name: add ansible user
+  user:
+    name: velociraptor
+    system: yes
+
+- name: set up sudo for ansible user
+  copy:
+    src: sudoer_velociraptor
+    dest: /etc/sudoers.d/velociraptor
+    owner: root
+    group: root
+    mode: 0440
+
+- name: add ansible-pull cron job
+  cron:
+    name: ansible auto-provision
+    user: velociraptor
+    minute: "*/10"
+    job: ansible-pull -o -U https://github.com/argrubbs/ansible_desktop.git
