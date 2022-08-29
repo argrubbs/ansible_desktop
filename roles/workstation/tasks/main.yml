@@ -116,6 +116,14 @@
 
 ### Set mpv config
 
+- name: create mpv config directory
+  ansible.builtin.file:
+    path: ~/.config/mpv
+    owner: adam
+    group: adam
+    state: directory
+    mode: 0755
+
 - name: Set HWDEC in mpv config
   become_user: adam
   ansible.builtin.template:
