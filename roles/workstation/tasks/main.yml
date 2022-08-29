@@ -143,10 +143,16 @@
     owner: root
     group: root
 
-- name: Set wallpaper
+- name: Set light wallpaper
   become_user: adam
   ansible.builtin.dconf:
     key: "/org/gnome/desktop/background/picture-uri"
+    value: "'file:///usr/share/backgrounds/ansible-wallpaper.jpg'"
+
+- name: Set dark wallpaper
+  become_user: adam
+  ansible.builtin.dconf:
+    key: "/org/gnome/desktop/background/picture-uri-dark"
     value: "'file:///usr/share/backgrounds/ansible-wallpaper.jpg'"
 
 - name: set wallpaper position
