@@ -10,6 +10,7 @@
       - vim
       - kernel-devel
       - mpv
+      - flatpak
     state: present
 
 ### Install github python module
@@ -82,12 +83,7 @@
   ansible.builtin.command:
     cmd: git-credential-manager-core configure
 
-### Install Flatpak and Flathub
-
-- name: Install Flatpak
-  ansible.builtin.dnf:
-    name: Flatpak
-    state: present
+### Install Flathub
 
 - name: Install Flathub
   community.general.flatpak_remote:
