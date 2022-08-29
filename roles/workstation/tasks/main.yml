@@ -35,6 +35,7 @@
       - "https://packages.microsoft.com/yumrepos/vscode"
     enabled: true
     gpgcheck: true
+    description: "VSCode Repo"
     gpgkey:
       - "https://packages.microsoft.com/keys/microsoft.asc"
 
@@ -52,6 +53,7 @@
       - "https://packages.microsoft.com/yumrepos/ms-teams"
     enabled: true
     gpgcakey: true
+    description: "MS Teams Repo"
     gpgkey:
       - "https://packages.microsoft.com/keys/microsoft.asc"
 
