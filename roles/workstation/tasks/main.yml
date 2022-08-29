@@ -80,16 +80,24 @@
     remote_src: true
 
 - name: Configure GCM Core
+  become_user: adam
   ansible.builtin.command:
     cmd: git-credential-manager-core configure
 
 ### Install Flathub
 
-- name: Install Flathub
+- name: Install Flathub for system
   community.general.flatpak_remote:
     name: flathub
     flatpakrepo_url: "https://flathub.org/repo/flathub.flatpakrepo"
     state: present
+
+- name: Install Flathub for users
+  community.general.flatpak_remote:
+    name: flathub
+    flatpakrepo_url: "https://flathub.org/repo/flathub.flatpakrepo"
+    state: present
+    method: user
 
 ### Install most-used Flatpaks
 
