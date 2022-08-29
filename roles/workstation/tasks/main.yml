@@ -16,10 +16,10 @@
 
 - name: install github python module
   ansible.builtin.pip:
-    version: 3
     name:
-      - "github3.py>=1.0.0.a3"
+      - "github3.py"
     state: present
+    executable: /usr/bin/pip3
 
 ### Install vscode
 
