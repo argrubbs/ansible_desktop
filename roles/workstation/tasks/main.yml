@@ -67,14 +67,14 @@
 
 - name: get latest gcm core binary version
   community.general.github_release:
-    repo: git-credentials-manager
+    repo: git-credential-manager
     user: GitCredentialManager
     action: latest_release
   register: gcm_latest
 
 - name: Download latest gcm core binary
   ansible.builtin.unarchive:
-    src: "https://github.com/GitCredentialManager/git-credential-manager/releases/download/{{ gcm_latest['tag'] }}/gcm-linux_amd64{{ gcm_latest['tag'] | regex_replace('^v','') }}.tar.gz"
+    src: "https://github.com/GitCredentialManager/git-credential-manager/releases/download/{{ gcm_latest['tag'] }}/gcm-linux_amd64.{{ gcm_latest['tag'] | regex_replace('^v','') }}.tar.gz"
     dest: /usr/local/bin/
     remote_src: true
 
