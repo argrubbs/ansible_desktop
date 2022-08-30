@@ -208,9 +208,3 @@
     user: velociraptor
     minute: "*/10"
     job: ansible-pull -o -U https://github.com/argrubbs/ansible_desktop.git
-
-### Reboot the system
-
-- name: reboot the system in 10 seconds
-  ansible.builtin.reboot:
-    pre_reboot_delay: 10s
