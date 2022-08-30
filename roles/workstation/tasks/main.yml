@@ -138,7 +138,6 @@
       - com.mattermost.Desktop
       - us.zoom.Zoom
       - com.mattjakeman.ExtensionManager
-    remote: flathub
     state: present
 
 ### Set mpv config
