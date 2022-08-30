@@ -120,11 +120,13 @@
 
 ### Install Flathub
 
+
 - name: Install Flathub for users
   community.general.flatpak_remote:
-    name: flathub
+    name: flathub-org
     flatpakrepo_url: "https://dl.flathub.org/repo/flathub.flatpakrepo"
     state: present
+    method: system   
 
 ### Install most-used Flatpaks
 
@@ -139,6 +141,7 @@
       - us.zoom.Zoom
       - com.mattjakeman.ExtensionManager
     state: present
+    remote: flathub-org
 
 ### Set mpv config
 
