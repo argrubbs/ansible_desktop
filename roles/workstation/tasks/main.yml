@@ -1,19 +1,43 @@
 ---
 
+
+
+- name: add RPMFusion free repo
+  ansible.builtin.dnf:
+    name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
+    state: present
+
+- name: add RPMFusion nonfree repo
+  ansible.builtin.dnf:
+    name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
+    state: present
+
+### Update packages
+- name: update packages
+  ansible.builtin.dnf:
+    name: '*'
+    update_cache: yes
+    state: latest
+
+- name: media codecs
+  ansible.builtin.dnf:
+    
 ### Install packages
 
 - name: Install python3-pip
-  ansible.builtin.package:
+  ansible.builtin.dnf:
     name:
       - python3-pip
       - python3-psutil
       - tmux
       - vim
+      - mpv
       - kernel-devel
       - flatpak
       - cronie
       - cronie-anacron
     state: present
+    update_cache: true
 
 ### Install github python module
 
@@ -104,6 +128,7 @@
 ### Install most-used Flatpaks
 
 - name: Install Desktop Flatpaks
+  become_user: adam
   community.general.flatpak:
     name:
       - org.telegram.desktop
