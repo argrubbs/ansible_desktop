@@ -123,7 +123,7 @@
 - name: Install Flathub for users
   community.general.flatpak_remote:
     name: flathub
-    flatpakrepo_url: "https://flathub.org/repo/flathub.flatpakrepo"
+    flatpakrepo_url: "https://dl.flathub.org/repo/flathub.flatpakrepo"
     state: present
 
 ### Install most-used Flatpaks
