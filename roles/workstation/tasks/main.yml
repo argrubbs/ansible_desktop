@@ -116,7 +116,7 @@
 - name: Configure GCM Core
   become_user: adam
   ansible.builtin.command:
-    cmd: git-credential-manager-core configure
+    cmd: git-credential-manager configure
 
 ### Install Flathub
 
