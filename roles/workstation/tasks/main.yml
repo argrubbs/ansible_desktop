@@ -20,6 +20,19 @@
     name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
     state: present
 
+### Enable ASUS tools
+- name: Enable asus-linux copr repo
+  community.general.copr:
+    host: copr.fedorainfracloud.org
+    state: enabled
+    name: lukenukem/asus-linux
+
+- name: Enable gnome-vrr copr repo
+  community.general.copr:
+    host: copr.fedorainfracloud.org
+    state: enabled
+    name: kylegospo/gnome-vrr
+
 ### Update packages
 - name: update packages
   ansible.builtin.dnf:
@@ -27,9 +40,42 @@
     update_cache: yes
     state: latest
 
-- name: media codecs
+- name: Install mutter-vrr and gnome-control-center-vrr
   ansible.builtin.dnf:
-    
+    name:
+      - mutter 
+      - gnome-control-center
+    enablerepo: '_copr_kylegospo-gnome-vrr'
+    state: present
+
+- name: Install asus-linux tools
+  ansible.builtin.dnf:
+    name:
+      - asusctl
+      - supergfxctl
+    state: latest
+
+- name: Enable supergfxd
+  ansible.builtin.systemd:
+    name: 'supergfxd'
+    state: started
+    daemon_reload: true
+    enabled: true
+
+- name: media codecs
+  ansible.builtin.command:
+    command: dnf groupupdate multimedia --setop="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin && sudo dnf groupupdate sound-and-video
+    register: codec
+    changed_when: codec.rc == 0
+    failed_when: codec.rc != 0
+
+- name: browser decoding
+  ansible.builtin.command:
+    command: dnf swap mesa-va-drivers mesa-va-drivers-freeworld && sudo dnf swap mesa-vdpau-drivers mesa-vdpau-drivers-freeworld
+    register: decode
+    changed_when: decode.rc == 0
+    failed_when: decode.rc != 0
+
 ### Install packages
 
 - name: Install python3-pip
@@ -47,6 +93,7 @@
     state: present
     update_cache: true
 
+
 ### Install github python module
 
 - name: install github python module
@@ -55,6 +102,43 @@
       - "github3.py>=1.0.0a3"
     state: present
     executable: /usr/bin/pip3
+
+### Install 1Password
+- name: Add 1Pass repo key
+  ansible.builtin.rpm_key:
+    key: "https://downloads.1password.com/linux/keys/1password.asc"
+    state: present
+
+- name: Add 1Pass dnf repo
+  ansible.builtin.yum_repository:
+    name: 1password
+    baseurl:
+      - "https://downloads.1password.com/linux/rpm/stable/$basearch"
+    enabled: true
+    gpgcheck: true
+    description: "1Password Stable Channel"
+    gpgkey:
+      - "https://downloads.1password.com/linux/keys/1password.asc"
+
+- name: Install 1Password app
+  ansible.builtin.dnf:
+    name: '1password'
+    state: present
+    update_cache: true
+
+- name: Install 1Password-cli tool
+  ansible.builtin.dnf:
+    name: 1password-cli
+    state: latest
+    update_cache: true
+
+- name: 1Password Login
+  become: no
+  expect:
+    command: 'op signin {{ op.address }} {{ op.email }} {{ op_secret }}'
+    responses:
+      (?i)password: '{{ op_pass }}'
+
 
 ### Install vscode
 
@@ -118,8 +202,32 @@
   ansible.builtin.command:
     cmd: git-credential-manager configure
 
-### Install Flathub
+- name: Get SSH keys from 1Pass
+  ansible.builtin.copy:
+    dest: '$HOME/.ssh/id_rsa'
+    content:: "-----BEGIN RSA PRIVATE KEY-----\n{{ lookup('onepassword', 'GitHub_SSH', field='private key') | replace(' ', '\n') }}\n-----END RSA PRIVATE KEY-----"
+    mode: 0600
 
+- name: Get Public SSH Key from 1Pass
+  ansible.builtin.copy:
+    dest: '$HOME/.ssh/id_rsa.pub'
+    content: "{{ lookup('onepassword', 'GitHub_SSH', field='public key') }}"
+    mode: 0640
+
+- name: Get APS Private Key
+  ansible.builtin.copy:
+    dest: '$HOME/.ssh/aps_rsa'
+    content:: "-----BEGIN RSA PRIVATE KEY-----\n{{ lookup('onepassword', 'APS SSH', field='private key') | replace(' ', '\n') }}\n-----END RSA PRIVATE KEY-----"
+    mode: 0600
+
+
+- name: Get APS Public Key
+  ansible.builtin.copy:
+    dest: '$HOME/.ssh/aps_rsa.pub'
+    content: "{{ lookup('onepassword', 'APS SSH', field='public key') }}"
+    mode: 0640
+
+### Install Flathub
 
 - name: Install Flathub for users
   community.general.flatpak_remote:
@@ -140,6 +248,10 @@
       - com.mattermost.Desktop
       - us.zoom.Zoom
       - com.mattjakeman.ExtensionManager
+      - com.valvesoftware.Steam
+      - com.obsproject.Studio
+      - com.obsproject.Studio.Plugin.OBSVkCapture
+      - org.freedesktop.Platform.VulkanLayer.OBSVkCapture
     state: present
     remote: flathub-org
 

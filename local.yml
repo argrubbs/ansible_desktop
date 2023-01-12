@@ -2,4 +2,7 @@
   connection: local
   become: true
   roles:
-    - workstation
+    - role: workstation
+    - role: artis3n.tailscale
+      vars:
+        tailscale_authkey: "{{ lookup('env', 'TAILSCALE_KEY') }}"

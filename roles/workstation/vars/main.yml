@@ -1,1 +1,5 @@
 ansible_python_interpreter: /usr/bin/python3
+op_secret: ""
+op_pass: ""
+op_email: "adam.ryan.grubbs@gmail.com"
+op_address: "my.1password.com"
