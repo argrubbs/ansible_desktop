@@ -100,6 +100,7 @@
     block: |
       KWIN_DRM_NO_DIRECT_SCANOUT=1
       MOZ_ENABLE_WAYLAND=1
+      EDITOR=vim
 
 ### Install github python module
 
