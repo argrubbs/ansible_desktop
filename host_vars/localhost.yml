@@ -1,0 +1,2 @@
+ansible_user: adam
+ansible_become_pass: '<SET_BEFORE_RUN>'

@@ -3,6 +3,9 @@
   become: true
   roles:
     - role: workstation
+      when: 'ansible_distribution' == 'Fedora'
+    - roles: arch
+      when: 'ansible_distribution' == 'Archlinux'
     - role: artis3n.tailscale
       vars:
         tailscale_authkey: "{{ lookup('env', 'TAILSCALE_KEY') }}"

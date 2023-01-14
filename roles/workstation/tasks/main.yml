@@ -62,19 +62,18 @@
     daemon_reload: true
     enabled: true
 
-- name: media codecs
-  ansible.builtin.command:
-    command: dnf groupupdate multimedia --setop="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin && sudo dnf groupupdate sound-and-video
-    register: codec
-    changed_when: codec.rc == 0
-    failed_when: codec.rc != 0
+      #- name: media codecs
+      #  ansible.builtin.command: 'dnf groupupdate multimedia --setop="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin && dnf groupupdate sound-and-video'
 
-- name: browser decoding
-  ansible.builtin.command:
-    command: dnf swap mesa-va-drivers mesa-va-drivers-freeworld && sudo dnf swap mesa-vdpau-drivers mesa-vdpau-drivers-freeworld
-    register: decode
-    changed_when: decode.rc == 0
-    failed_when: decode.rc != 0
+      #- name: browser decoding
+  #ansible.builtin.command: 'dnf swap mesa-va-drivers mesa-va-drivers-freeworld'
+    #register: decode_one
+    # changed_when: decode_one.rc == 0
+    
+    #- name: more decoding
+    # ansible.builtin.command: 'dnf swap mesa-vdpau-drivers mesa-vdpau-drivers-freeworld'
+    # register: decode_two
+    # changed_when: decode_two.rc == 0
 
 ### Install packages
 
@@ -131,13 +130,6 @@
     name: 1password-cli
     state: latest
     update_cache: true
-
-- name: 1Password Login
-  become: no
-  expect:
-    command: 'op signin {{ op.address }} {{ op.email }} {{ op_secret }}'
-    responses:
-      (?i)password: '{{ op_pass }}'
 
 
 ### Install vscode
@@ -202,31 +194,6 @@
   ansible.builtin.command:
     cmd: git-credential-manager configure
 
-- name: Get SSH keys from 1Pass
-  ansible.builtin.copy:
-    dest: '$HOME/.ssh/id_rsa'
-    content:: "-----BEGIN RSA PRIVATE KEY-----\n{{ lookup('onepassword', 'GitHub_SSH', field='private key') | replace(' ', '\n') }}\n-----END RSA PRIVATE KEY-----"
-    mode: 0600
-
-- name: Get Public SSH Key from 1Pass
-  ansible.builtin.copy:
-    dest: '$HOME/.ssh/id_rsa.pub'
-    content: "{{ lookup('onepassword', 'GitHub_SSH', field='public key') }}"
-    mode: 0640
-
-- name: Get APS Private Key
-  ansible.builtin.copy:
-    dest: '$HOME/.ssh/aps_rsa'
-    content:: "-----BEGIN RSA PRIVATE KEY-----\n{{ lookup('onepassword', 'APS SSH', field='private key') | replace(' ', '\n') }}\n-----END RSA PRIVATE KEY-----"
-    mode: 0600
-
-
-- name: Get APS Public Key
-  ansible.builtin.copy:
-    dest: '$HOME/.ssh/aps_rsa.pub'
-    content: "{{ lookup('onepassword', 'APS SSH', field='public key') }}"
-    mode: 0640
-
 ### Install Flathub
 
 - name: Install Flathub for users
@@ -244,14 +211,14 @@
     name:
       - org.telegram.desktop
       - tv.plex.PlexDesktop
-      - com.discordapp.discord
+      - com.discordapp.Discord
       - com.mattermost.Desktop
       - us.zoom.Zoom
       - com.mattjakeman.ExtensionManager
       - com.valvesoftware.Steam
       - com.obsproject.Studio
       - com.obsproject.Studio.Plugin.OBSVkCapture
-      - org.freedesktop.Platform.VulkanLayer.OBSVkCapture
+      - org.freedesktop.Platform.VulkanLayer.OBSVkCapture/x86_64/22.08
     state: present
     remote: flathub-org
 
