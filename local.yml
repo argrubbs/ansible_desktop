@@ -1,11 +1,7 @@
 - hosts: localhost
   connection: local
-  become: true
   roles:
-    - role: workstation
-      when: 'ansible_distribution' == 'Fedora'
-    - roles: arch
-      when: 'ansible_distribution' == 'Archlinux'
+    - role: arch
     - role: artis3n.tailscale
       vars:
         tailscale_authkey: "{{ lookup('env', 'TAILSCALE_KEY') }}"

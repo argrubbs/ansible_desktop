@@ -10,6 +10,10 @@
       SigLevel = DatabaseNever Optional TrustAll
       Server = https://arch.asus-linux.org
 
+- name: refresh pacman cache
+  community.general.pacman:
+    update_cache: true
+
 - name: Create dev folder
   ansible.builtin.file:
     path: /home/adam/dev
@@ -30,11 +34,54 @@
     cmd: 'makepkg -sfi --noconfirm'
     creates: '/usr/bin/yay'
 
+- name: Create the `aur_builder` user
+  become: yes
+  ansible.builtin.user:
+    name: aur_builder
+    create_home: yes
+    group: wheel
+
+- name: Allow the `aur_builder` user to run `sudo pacman` without a password
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/11-install-aur_builder
+    line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+    create: yes
+    validate: 'visudo -cf %s'
+
+### Install packages
+
+- name: Install essential packages
+  become: true
+  become_method: sudo
+  community.general.pacman:
+    name:
+      - python-pip
+      - python-psutil
+      - tmux
+      - vim
+      - mpv
+      - base-devel
+      - flatpak
+      - steam
+      - wine
+      - code
+      - lutris
+      - spectacle
+      - remmina
+      - rsync
+      - kaccounts-providers
+      - firefox
+      - gamemode
+      - okular
+    state: present
+    update_cache: true
+
 - name: Install asus-linux tools
   become: true
   become_method: sudo
   community.general.pacman:
-    name: ['asusctl', 'supergfxctl']
+    name: ['asusctl', 'supergfxctl', 'rog-control-center']
     state: present
 
 - name: Enable supergfxd
@@ -46,47 +93,23 @@
     daemon_reload: true
     enabled: true
 
-### Install packages
-
-- name: Install essential packages
-  become: true
-  become_method: sudo
-  community.general.pacman:
-    name:
-      - python3-pip
-      - python3-psutil
-      - tmux
-      - vim
-      - mpv
-      - base-devel
-      - flatpak
-      - steam
-      - wine
-      - code
-      - lutris
-      - rocm-opencl-runtime
-      - spectacle
-      - remmina
-    state: present
-    update_cache: true
-
 - name: Install common AUR packages
-  community.general.pacman:
-    name:
-      - amf-amdgpu-pro
-      - steamtinkerlaunch
-      - mesa-git
-      - obs-studio-amf
-      - mangohud
-      - lib32-mangohud
-      - gamemode
-      - git-credential-manager-core-bin]
-      - obs-vkcapture-git
-      - lib32-obs-vkcapture-git
-      - amd-vulkan-prefixes
-    executable: yay
+    kewlfft.aur.aur:
+      name:
+        - amf-amdgpu-pro
+        - steamtinkerlaunch
+        - mesa-git
+        - obs-studio-amf
+        - mangohud
+        - lib32-mangohud
+        - gamemode
+        - obs-vkcapture-git
+        - lib32-obs-vkcapture-git
+        - 1password
+        - 1password-cli
+    use: yay
     state: present
-    extra_args: "--builddir /var/cache/yay"
+    become_user: aur_builder
 
 
 ### Set environment variables
@@ -103,29 +126,19 @@
       EDITOR=vim
 
 ### Install github python module
-
-- name: Install github python module
-  become: true
-  become_method: sudo
-  ansible.builtin.pip:
-    name:
-      - "github3.py>=1.0.0a3"
-    state: present
-    executable: /usr/bin/pip3
-
-### Install 1Password
-- name: Import 1Password GPG key
-  community.general.pacman_key:
-    url: "https://downloads.1password.com/linux/keys/1password.asc"
-    state: present
-    id: "3FEF9748469ADBE15DA7CA80AC2D62742012EA22"
-
-- name: Install 1password tools
+- name: INstall virualenvwrapper
   community.general.pacman:
-    name: ['1password', '1password-cli']
-    executable: yay
+    name: python-virtualenvwrapper
     state: present
-    extra_args: "--builddir /var/cache/yay"
+
+- name: Add virtualenvwrapper to bashrc
+  ansible.builtin.blockinfile:
+    path: '/home/adam/.bashrc'
+    state: present
+    block: |
+      export WORKON_HOME=$HOME/.virtualenvs
+      export PROJECT_HOME=$HOME/Devel
+      source /usr/local/bin/virtualenvwrapper.sh
 
 - name: Set up 1password-cli bash-completion
   ansible.builtin.blockinfile:
@@ -133,14 +146,6 @@
     state: present
     block: |
       source <(op completion bash)
-
-
-### Configure git credential manager
-
-- name: Configure GCM Core
-  ansible.builtin.command:
-    cmd: git-credential-manager configure
-    creates: /home/adam/.gitconfig
 
 ### Install most-used Flatpaks
 
@@ -153,9 +158,8 @@
       - com.mattermost.Desktop
       - us.zoom.Zoom
       - com.mattjakeman.ExtensionManager
-      - com.valvesoftware.Steam
     state: present
-    remote: flathub-org
+    remote: flathub
 
 ### Set mpv config
 
@@ -178,9 +182,11 @@
 ### Set wallpaper
 
 - name: Copy wallpaper
+  become: true
+  become_method: sudo
   ansible.builtin.copy:
-    src: "files/wallpaper.jpg"
-    dest: /usr/share/backgrounds/ansible-wallpaper.jpg
+    src: "wallpaper.jpg"
+    dest: /usr/share/wallpapers/ansible-wallpaper.jpg
     owner: root
     group: root
     mode: '0755'
