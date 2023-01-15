@@ -11,6 +11,8 @@
       Server = https://arch.asus-linux.org
 
 - name: refresh pacman cache
+  become: true
+  become_method: sudo
   community.general.pacman:
     update_cache: true
 
@@ -94,22 +96,21 @@
     enabled: true
 
 - name: Install common AUR packages
-    kewlfft.aur.aur:
-      name:
-        - amf-amdgpu-pro
-        - steamtinkerlaunch
-        - mesa-git
-        - obs-studio-amf
-        - mangohud
-        - lib32-mangohud
-        - gamemode
-        - obs-vkcapture-git
-        - lib32-obs-vkcapture-git
-        - 1password
-        - 1password-cli
+  kewlfft.aur.aur:
+    name:
+      - amf-amdgpu-pro
+      - steamtinkerlaunch
+      - obs-studio-amf
+      - mangohud
+      - lib32-mangohud
+      - gamemode
+      - obs-vkcapture-git
+      - lib32-obs-vkcapture-git
+      - 1password
+      - 1password-cli
     use: yay
     state: present
-    become_user: aur_builder
+  become_user: aur_builder
 
 
 ### Set environment variables
@@ -127,6 +128,8 @@
 
 ### Install github python module
 - name: INstall virualenvwrapper
+  become: true
+  become_method: sudo
   community.general.pacman:
     name: python-virtualenvwrapper
     state: present
@@ -186,7 +189,7 @@
   become_method: sudo
   ansible.builtin.copy:
     src: "wallpaper.jpg"
-    dest: /usr/share/wallpapers/ansible-wallpaper.jpg
+    dest: /usr/share/backgrounds/ansible-wallpaper.jpg
     owner: root
     group: root
     mode: '0755'
