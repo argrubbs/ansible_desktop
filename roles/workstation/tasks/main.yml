@@ -1,14 +1,14 @@
 ---
 
-- name: add RPMFusion free key
-  ansible.builtin.rpm_key:
-    key: "https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020"
-    state: present
+# - name: add RPMFusion free key
+#   ansible.builtin.rpm_key:
+#     key: "https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020"
+#     state: present
 
-- name: add RPMFusion nonfree key
-  ansible.builtin.rpm_key:
-    key: "https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-nonfree-fedora-2020"
-    state: present
+# - name: add RPMFusion nonfree key
+#   ansible.builtin.rpm_key:
+#     key: "https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-nonfree-fedora-2020"
+#     state: present
 
 - name: add RPMFusion free repo
   ansible.builtin.dnf:
@@ -21,17 +21,17 @@
     state: present
 
 ### Enable ASUS tools
-- name: Enable asus-linux copr repo
-  community.general.copr:
-    host: copr.fedorainfracloud.org
-    state: enabled
-    name: lukenukem/asus-linux
+# - name: Enable asus-linux copr repo
+#   community.general.copr:
+#     host: copr.fedorainfracloud.org
+#     state: enabled
+#     name: lukenukem/asus-linux
 
-- name: Enable gnome-vrr copr repo
-  community.general.copr:
-    host: copr.fedorainfracloud.org
-    state: enabled
-    name: kylegospo/gnome-vrr
+# - name: Enable gnome-vrr copr repo
+#   community.general.copr:
+#     host: copr.fedorainfracloud.org
+#     state: enabled
+#     name: kylegospo/gnome-vrr
 
 ### Update packages
 - name: update packages
@@ -40,27 +40,27 @@
     update_cache: yes
     state: latest
 
-- name: Install mutter-vrr and gnome-control-center-vrr
-  ansible.builtin.dnf:
-    name:
-      - mutter 
-      - gnome-control-center
-    enablerepo: '_copr_kylegospo-gnome-vrr'
-    state: present
+# - name: Install mutter-vrr and gnome-control-center-vrr
+#   ansible.builtin.dnf:
+#     name:
+#       - mutter 
+#       - gnome-control-center
+#     enablerepo: '_copr_kylegospo-gnome-vrr'
+#     state: present
 
-- name: Install asus-linux tools
-  ansible.builtin.dnf:
-    name:
-      - asusctl
-      - supergfxctl
-    state: latest
+# - name: Install asus-linux tools
+#   ansible.builtin.dnf:
+#     name:
+#       - asusctl
+#       - supergfxctl
+#     state: latest
 
-- name: Enable supergfxd
-  ansible.builtin.systemd:
-    name: 'supergfxd'
-    state: started
-    daemon_reload: true
-    enabled: true
+# - name: Enable supergfxd
+#   ansible.builtin.systemd:
+#     name: 'supergfxd'
+#     state: started
+#     daemon_reload: true
+#     enabled: true
 
       #- name: media codecs
       #  ansible.builtin.command: 'dnf groupupdate multimedia --setop="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin && dnf groupupdate sound-and-video'
@@ -77,13 +77,11 @@
 
 ### Install packages
 
-- name: Install python3-pip
+- name: Install DNF packages
   ansible.builtin.dnf:
     name:
-      - python3-pip
-      - python3-psutil
       - tmux
-      - vim
+      - neovim
       - mpv
       - kernel-devel
       - flatpak
@@ -95,12 +93,12 @@
 
 ### Install github python module
 
-- name: install github python module
-  ansible.builtin.pip:
-    name:
-      - "github3.py>=1.0.0a3"
-    state: present
-    executable: /usr/bin/pip3
+# - name: install github python module
+#   ansible.builtin.pip:
+#     name:
+#       - "github3.py>=1.0.0a3"
+#     state: present
+#     executable: /usr/bin/pip3
 
 ### Install 1Password
 - name: Add 1Pass repo key
@@ -121,73 +119,101 @@
 
 - name: Install 1Password app
   ansible.builtin.dnf:
-    name: '1password'
+    name:
+      - '1password'
+      - '1password-cli'
     state: present
     update_cache: true
 
-- name: Install 1Password-cli tool
+  ### Install LazyVim
+
+- name: Clone LazyVim repo into .config
+  ansible.builtin.git:
+    repo: https://github.com/LazyVim/starter
+    dest: /home/adam/.config/nvim
+
+- name: Remove LazyVim Git folder
+  ansible.builtin.file:
+    path: /home/adam/.config/nvim/.git
+    state: absent
+
+- name: Set up Lazygit copr repo
+  community.general.copr:
+    host: copr.fedorainfracloud.org
+    state: enabled
+    name: atim/lazygit
+
+- name: Install Lazygit package
   ansible.builtin.dnf:
-    name: 1password-cli
-    state: latest
-    update_cache: true
-
-
-### Install vscode
-
-- name: Install MS RPM key
-  ansible.builtin.rpm_key:
-    key: "https://packages.microsoft.com/keys/microsoft.asc"
-    state: present
-
-- name: Add MS VSCode RPM repo
-  ansible.builtin.yum_repository:
-    name: vscode
-    baseurl:
-      - "https://packages.microsoft.com/yumrepos/vscode"
-    enabled: true
-    gpgcheck: true
-    description: "VSCode Repo"
-    gpgkey:
-      - "https://packages.microsoft.com/keys/microsoft.asc"
-
-- name: Install vscode packages
-  ansible.builtin.dnf:
-    name: code
+    name: 'lazygit'
     state: present
     update_cache: true
 
-### Install Microsoft Teams
-- name: Add MS Teams RPM Repo
-  ansible.builtin.yum_repository:
-    name: ms-teams
-    baseurl:
-      - "https://packages.microsoft.com/yumrepos/ms-teams"
-    enabled: true
-    gpgcakey: true
-    description: "MS Teams Repo"
-    gpgkey:
-      - "https://packages.microsoft.com/keys/microsoft.asc"
 
-- name: Install MS Teams RPM
-  ansible.builtin.dnf:
-    name: teams
-    state: present
-    update_cache: true
+
+
+
+# ### Install vscode
+#
+# - name: Install MS RPM key
+#   ansible.builtin.rpm_key:
+#     key: "https://packages.microsoft.com/keys/microsoft.asc"
+#     state: present
+#
+# - name: Add MS VSCode RPM repo
+#   ansible.builtin.yum_repository:
+#     name: vscode
+#     baseurl:
+#       - "https://packages.microsoft.com/yumrepos/vscode"
+#     enabled: true
+#     gpgcheck: true
+#     description: "VSCode Repo"
+#     gpgkey:
+#       - "https://packages.microsoft.com/keys/microsoft.asc"
+#
+# - name: Install vscode packages
+#   ansible.builtin.dnf:
+#     name: code
+#     state: present
+#     update_cache: true
+#
+# ### Install Microsoft Teams
+# - name: Add MS Teams RPM Repo
+#   ansible.builtin.yum_repository:
+#     name: ms-teams
+#     baseurl:
+#       - "https://packages.microsoft.com/yumrepos/ms-teams"
+#     enabled: true
+#     gpgcakey: true
+#     description: "MS Teams Repo"
+#     gpgkey:
+#       - "https://packages.microsoft.com/keys/microsoft.asc"
+#
+# - name: Install MS Teams RPM
+#   ansible.builtin.dnf:
+#     name: teams
+#     state: present
+#     update_cache: true
 
 ### Install git credential manager
 
 - name: get latest gcm core binary version
-  community.general.github_release:
-    repo: git-credential-manager
-    user: GitCredentialManager
-    action: latest_release
+  ansible.builtin.uri:
+    url: 'https://api.github.com/repos/git-ecosystem/git-credential-manager/releases/latest'
+    return_content: true
   register: gcm_latest
 
-- name: Download latest gcm core binary
+- name: "Download GCM {{ gcm_latest.json.tag_name }}"
+  loop: "{{ gcm_latest.json.assets }}"
+  when: "'linux_amd64' is in item.name AND 'symbols' is not in item.name"
   ansible.builtin.unarchive:
-    src: "https://github.com/GitCredentialManager/git-credential-manager/releases/download/{{ gcm_latest['tag'] }}/gcm-linux_amd64.{{ gcm_latest['tag'] | regex_replace('^v','') }}.tar.gz"
-    dest: /usr/local/bin/
-    remote_src: true
+    remote_src: yes
+    src: "{{ item.browser_download_url }}"
+    dest: '/usr/local/bin'
+    keep_newer: yes
+    extra_opts:
+      - --strip=1
+      - --no-anchored
 
 - name: Configure GCM Core
   become_user: adam
@@ -196,12 +222,12 @@
 
 ### Install Flathub
 
-- name: Install Flathub for users
-  community.general.flatpak_remote:
-    name: flathub-org
-    flatpakrepo_url: "https://dl.flathub.org/repo/flathub.flatpakrepo"
-    state: present
-    method: system   
+# - name: Install Flathub for users
+#   community.general.flatpak_remote:
+#     name: flathub-org
+#     flatpakrepo_url: "https://dl.flathub.org/repo/flathub.flatpakrepo"
+#     state: present
+#     method: system   
 
 ### Install most-used Flatpaks
 
@@ -210,11 +236,9 @@
   community.general.flatpak:
     name:
       - org.telegram.desktop
-      - tv.plex.PlexDesktop
       - com.discordapp.Discord
       - com.mattermost.Desktop
       - us.zoom.Zoom
-      - com.mattjakeman.ExtensionManager
       - com.valvesoftware.Steam
       - com.obsproject.Studio
       - com.obsproject.Studio.Plugin.OBSVkCapture
@@ -241,49 +265,49 @@
 
 ### Set wallpaper
 
-- name: Copy wallpaper
-  ansible.builtin.copy:
-    src: "wallpaper.jpg"
-    dest: /usr/share/backgrounds/ansible-wallpaper.jpg
-    owner: root
-    group: root
+# - name: Copy wallpaper
+#   ansible.builtin.copy:
+#     src: "wallpaper.jpg"
+#     dest: /usr/share/backgrounds/ansible-wallpaper.jpg
+#     owner: root
+#     group: root
 
-- name: Set light wallpaper
-  become_user: adam
-  ansible.builtin.dconf:
-    key: "/org/gnome/desktop/background/picture-uri"
-    value: "'file:///usr/share/backgrounds/ansible-wallpaper.jpg'"
+# - name: Set light wallpaper
+#   become_user: adam
+#   ansible.builtin.dconf:
+#     key: "/org/gnome/desktop/background/picture-uri"
+#     value: "'file:///usr/share/backgrounds/ansible-wallpaper.jpg'"
 
-- name: Set dark wallpaper
-  become_user: adam
-  ansible.builtin.dconf:
-    key: "/org/gnome/desktop/background/picture-uri-dark"
-    value: "'file:///usr/share/backgrounds/ansible-wallpaper.jpg'"
+# - name: Set dark wallpaper
+#   become_user: adam
+#   ansible.builtin.dconf:
+#     key: "/org/gnome/desktop/background/picture-uri-dark"
+#     value: "'file:///usr/share/backgrounds/ansible-wallpaper.jpg'"
 
-- name: set wallpaper position
-  become_user: adam
-  ansible.builtin.dconf:
-    key: "/org/gnome/desktop/background/picture-options"
-    value: "'zoom'"
+# - name: set wallpaper position
+#   become_user: adam
+#   ansible.builtin.dconf:
+#     key: "/org/gnome/desktop/background/picture-options"
+#     value: "'zoom'"
 
-  ### Add ansible-pull automation
-
-- name: add ansible user
-  user:
-    name: velociraptor
-    system: yes
-
-- name: set up sudo for ansible user
-  copy:
-    src: sudoer_velociraptor
-    dest: /etc/sudoers.d/velociraptor
-    owner: root
-    group: root
-    mode: 0440
-
-- name: add ansible-pull cron job
-  cron:
-    name: ansible auto-provision
-    user: velociraptor
-    minute: "*/10"
-    job: ansible-pull -o -U https://github.com/argrubbs/ansible_desktop.git
+#   ### Add ansible-pull automation
+#
+# - name: add ansible user
+#   user:
+#     name: velociraptor
+#     system: yes
+#
+# - name: set up sudo for ansible user
+#   copy:
+#     src: sudoer_velociraptor
+#     dest: /etc/sudoers.d/velociraptor
+#     owner: root
+#     group: root
+#     mode: 0440
+#
+# - name: add ansible-pull cron job
+#   cron:
+#     name: ansible auto-provision
+#     user: velociraptor
+#     minute: "*/10"
+#     job: ansible-pull -o -U https://github.com/argrubbs/ansible_desktop.git
