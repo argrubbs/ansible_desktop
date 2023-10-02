@@ -1,5 +1,21 @@
 ---
 
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: fedora-r15
+    use: systemd
+
+- name: Set DNF fastest mirror
+  ansible.builtin.lineinfile:
+    path: /etc/dnf/dnf.conf
+    line: 'fastestmirror=True'
+
+- name: Set Wayland to Enabled on GDM
+  ansible.builtin.lineinfile:
+    path: /etc/gdm/custom.conf
+    regexp: '.*WaylandEnable.*'
+    line: 'WaylandEnable=true'
+
 - name: add RPMFusion free key
   ansible.builtin.rpm_key:
     key: "https://rpmfusion.org/keys?action=AttachFile&do=get&target=RPM-GPG-KEY-rpmfusion-free-fedora-2020"
@@ -245,6 +261,16 @@
       - org.freedesktop.Platform.VulkanLayer.OBSVkCapture/x86_64/22.08
     state: present
     remote: flathub-org
+### Set Environment Variables
+
+- name: Add variables to /etc/Environment
+  ansible.builtin.blockinfile:
+    path: /etc/Environment
+    block: |
+      VKD3D_CONFIG=dxr11,dxr
+      PROTON_ENABLE_NVAPI=1
+      PROTON_ENABLE_NGX_UPDATER=1
+      MOZ_ENABLE_WAYLAND=1
 
 ### Set mpv config
 
