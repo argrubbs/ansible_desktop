@@ -1,0 +1,195 @@
+---
+### Enable ASUS tools
+# - name: Enable asus-linux pacman repo
+#   become: true
+#   become_method: sudo
+#   ansible.builtin.blockinfile:
+#     path: '/etc/pacman.conf'
+#     block: |
+#       [g14]
+#       SigLevel = DatabaseNever Optional TrustAll
+#       Server = https://arch.asus-linux.org
+
+- name: refresh pacman cache
+  become: true
+  become_method: sudo
+  community.general.pacman:
+    update_cache: true
+
+- name: Create dev folder
+  ansible.builtin.file:
+    path: /home/adam/dev
+    state: directory
+    mode: '0755'
+    owner: adam
+    group: adam
+
+- name: Clone yay AUR helper
+  ansible.builtin.git:
+    repo: 'https://aur.archlinux.org/yay-bin.git'
+    dest: '/home/adam/dev/yay'
+    update: true
+
+- name: Build and install yay
+  ansible.builtin.command:
+    chdir: '/home/adam/dev/yay'
+    cmd: 'makepkg -sfi --noconfirm'
+    creates: '/usr/bin/yay'
+
+- name: Create the `aur_builder` user
+  become: yes
+  ansible.builtin.user:
+    name: aur_builder
+    create_home: yes
+    group: wheel
+
+- name: Allow the `aur_builder` user to run `sudo pacman` without a password
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/11-install-aur_builder
+    line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+    create: yes
+    validate: 'visudo -cf %s'
+
+### Install packages
+
+- name: Install essential packages
+  become: true
+  become_method: sudo
+  community.general.pacman:
+    name:
+      - tmux
+      - neovim
+      - mpv
+      - base-devel
+      - flatpak
+      - steam
+      - lutris
+      - rsync
+      - firefox
+      - gamemode
+    state: present
+    update_cache: true
+
+# - name: Install asus-linux tools
+#   become: true
+#   become_method: sudo
+#   community.general.pacman:
+#     name: ['asusctl', 'supergfxctl', 'rog-control-center']
+#     state: present
+# #
+# - name: Enable supergfxd
+#   become: true
+#   become_method: sudo
+#   ansible.builtin.systemd:
+#     name: 'supergfxd'
+#     state: started
+#     daemon_reload: true
+#     enabled: true
+
+- name: Install common AUR packages
+  kewlfft.aur.aur:
+    name:
+      - mangohud
+      - lib32-mangohud
+      - gamemode
+      - obs-vkcapture-git
+      - lib32-obs-vkcapture-git
+      - 1password
+      - 1password-cli
+    use: yay
+    state: present
+  become_user: aur_builder
+
+
+### Set environment variables
+
+- name: Set env variables
+  become: true
+  become_method: sudo
+  ansible.builtin.blockinfile:
+    path: '/etc/environment'
+    state: present
+    block: |
+      MOZ_ENABLE_WAYLAND=1
+      EDITOR=vim
+      VKD3D_CONFIG=dxr11,dxr
+      PROTON_ENABLE_NVAPI=1
+      PROTON_ENABLE_NGX_UPDATER=1
+
+### Install github python module
+# - name: INstall virualenvwrapper
+#   become: true
+#   become_method: sudo
+#   community.general.pacman:
+#     name: python-virtualenvwrapper
+#     state: present
+#
+# - name: Add virtualenvwrapper to bashrc
+#   ansible.builtin.blockinfile:
+#     path: '/home/adam/.bashrc'
+#     state: present
+#     block: |
+#       export WORKON_HOME=$HOME/.virtualenvs
+#       export PROJECT_HOME=$HOME/Devel
+#       source /usr/local/bin/virtualenvwrapper.sh
+
+- name: Set up 1password-cli bash-completion
+  ansible.builtin.lineinfile:
+    path: "/home/adam/.bashrc"
+    state: present
+    line: source <(op completion bash)
+
+### Install most-used Flatpaks
+
+- name: Install Desktop Flatpaks
+  become_user: adam
+  community.general.flatpak:
+    name:
+      - org.telegram.desktop
+      - tv.plex.PlexDesktop
+      - com.discordapp.Discord
+      - com.mattermost.Desktop
+      - us.zoom.Zoom
+      - com.mattjakeman.ExtensionManager
+    state: present
+    remote: flathub
+
+### Set mpv config
+
+- name: Create mpv config directory
+  ansible.builtin.file:
+    path: "~/.config/mpv/"
+    owner: adam
+    group: adam
+    state: directory
+    mode: '0755'
+
+- name: Set HWDEC in mpv config
+  ansible.builtin.template:
+    src: "mpv.conf.j2"
+    dest: "~/.config/mpv/mpv.conf"
+    mode: '0755'
+    owner: adam
+    group: adam
+
+### Set wallpaper
+
+# - name: Copy wallpaper
+#   become: true
+#   become_method: sudo
+#   ansible.builtin.copy:
+#     src: "wallpaper.jpg"
+#     dest: /usr/share/backgrounds/ansible-wallpaper.jpg
+#     owner: root
+#     group: root
+#     mode: '0755'
+
+### Enable trim
+### Enable SSD Trim
+- name: SSD Trim
+  become: true
+  become_method: sudo
+  ansible.builtin.systemd:
+    name: fstrim.timer
+    enabled: true
