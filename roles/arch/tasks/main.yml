@@ -2,17 +2,17 @@
 ### Enable ASUS tools
 - name: Enable asus-linux pacman repo
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.blockinfile:
-    path: '/etc/pacman.conf'
+    path: "/etc/pacman.conf"
     block: |
       [g14]
       SigLevel = DatabaseNever Optional TrustAll
       Server = https://arch.asus-linux.org
 
-- name: refresh pacman cache
+- name: Refresh pacman cache
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   community.general.pacman:
     update_cache: true
 
@@ -20,42 +20,44 @@
   ansible.builtin.file:
     path: /home/adam/dev
     state: directory
-    mode: '0755'
+    mode: "0755"
     owner: adam
     group: adam
 
 - name: Clone yay AUR helper
   ansible.builtin.git:
-    repo: 'https://aur.archlinux.org/yay.git'
-    dest: '/home/adam/dev/yay'
+    repo: "https://aur.archlinux.org/yay.git"
+    dest: "/home/adam/dev/yay"
     update: true
+  creates: "/home/adam/dev/yay"
 
 - name: Build and install yay
   ansible.builtin.command:
-    chdir: '/home/adam/dev/yay'
-    cmd: 'makepkg -sfi --noconfirm'
-    creates: '/usr/bin/yay'
+    chdir: "/home/adam/dev/yay"
+    cmd: "makepkg -sfi --noconfirm"
+    creates: "/usr/bin/yay"
 
 - name: Create the `aur_builder` user
-  become: yes
+  become: true
   ansible.builtin.user:
     name: aur_builder
-    create_home: yes
+    create_home: true
     group: wheel
 
-- name: Allow the `aur_builder` user to run `sudo pacman` without a password
-  become: yes
+- name: Allow the `aur_builder` user to run `aansi pacman` without a password
+  become: true
   ansible.builtin.lineinfile:
-    path: /etc/sudoers.d/11-install-aur_builder
-    line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
-    create: yes
-    validate: 'visudo -cf %s'
+    path: /etc/aansiers.d/11-install-aur_builder
+    line: "aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman"
+    create: true
+    validate: "viaansi -cf %s"
+    mode: "0440"
 
 ### Install packages
 
 - name: Install essential packages
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   community.general.pacman:
     name:
       - python-pip
@@ -81,16 +83,16 @@
 
 - name: Install asus-linux tools
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   community.general.pacman:
-    name: ['asusctl', 'supergfxctl', 'rog-control-center']
+    name: ["asusctl", "supergfxctl", "rog-control-center"]
     state: present
 
 - name: Enable supergfxd
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.systemd:
-    name: 'supergfxd'
+    name: "supergfxd"
     state: started
     daemon_reload: true
     enabled: true
@@ -111,15 +113,16 @@
     use: yay
     state: present
   become_user: aur_builder
-
+  become: true
+  become_method: ansible.builtin.sudo
 
 ### Set environment variables
 
 - name: Set env variables
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.blockinfile:
-    path: '/etc/environment'
+    path: "/etc/environment"
     state: present
     block: |
       KWIN_DRM_NO_DIRECT_SCANOUT=1
@@ -129,14 +132,14 @@
 ### Install github python module
 - name: INstall virualenvwrapper
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   community.general.pacman:
     name: python-virtualenvwrapper
     state: present
 
 - name: Add virtualenvwrapper to bashrc
   ansible.builtin.blockinfile:
-    path: '/home/adam/.bashrc'
+    path: "/home/adam/.bashrc"
     state: present
     block: |
       export WORKON_HOME=$HOME/.virtualenvs
@@ -172,13 +175,13 @@
     owner: adam
     group: adam
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Set HWDEC in mpv config
   ansible.builtin.template:
     src: "mpv.conf.j2"
     dest: "~/.config/mpv/mpv.conf"
-    mode: '0755'
+    mode: "0755"
     owner: adam
     group: adam
 
@@ -186,19 +189,19 @@
 
 - name: Copy wallpaper
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.copy:
     src: "wallpaper.jpg"
     dest: /usr/share/backgrounds/ansible-wallpaper.jpg
     owner: root
     group: root
-    mode: '0755'
+    mode: "0755"
 
 ### Enable trim
 ### Enable SSD Trim
 - name: SSD Trim
   become: true
-  become_method: sudo
+  become_method: ansible.builtin.sudo
   ansible.builtin.systemd:
     name: fstrim.timer
     enabled: true
