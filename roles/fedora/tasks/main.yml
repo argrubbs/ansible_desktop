@@ -1,0 +1,35 @@
+---
+- name: Update all system packages
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+  become: true
+
+- name: Install essential packages
+  ansible.builtin.dnf:
+    name: "{{ fedora_packages }}"
+    state: present
+  become: true
+
+- name: Ensure Flathub remote is added
+  community.general.flatpak_remote:
+    name: flathub
+    flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
+    state: present
+  become: true
+
+- name: Install Desktop Flatpaks
+  become: true
+  community.general.flatpak:
+    name: "{{ fedora_flatpaks }}"
+    state: present
+    remote: flathub
+
+- name: Create dev folder
+  ansible.builtin.file:
+    path: /home/adam/dev
+    state: directory
+    mode: '0755'
+    owner: adam
+    group: adam
+  become: true

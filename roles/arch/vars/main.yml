@@ -1,1 +1,41 @@
 ansible_python_interpreter: /usr/bin/python3
+
+arch_packages:
+  - python-pip
+  - python-psutil
+  - tmux
+  - vim
+  - mpv
+  - base-devel
+  - flatpak
+  - steam
+  - wine
+  - code
+  - lutris
+  - spectacle
+  - remmina
+  - rsync
+  - kaccounts-providers
+  - firefox
+  - gamemode
+  - okular
+
+arch_aur_packages:
+  - amf-amdgpu-pro
+  - steamtinkerlaunch
+  - obs-studio-amf
+  - mangohud
+  - lib32-mangohud
+  - gamemode
+  - obs-vkcapture-git
+  - lib32-obs-vkcapture-git
+  - 1password
+  - 1password-cli
+
+arch_flatpaks:
+  - org.telegram.desktop
+  - tv.plex.PlexDesktop
+  - com.discordapp.Discord
+  - com.mattermost.Desktop
+  - us.zoom.Zoom
+  - com.mattjakeman.ExtensionManager

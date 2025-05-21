@@ -59,25 +59,7 @@
   become: true
   become_method: ansible.builtin.sudo
   community.general.pacman:
-    name:
-      - python-pip
-      - python-psutil
-      - tmux
-      - vim
-      - mpv
-      - base-devel
-      - flatpak
-      - steam
-      - wine
-      - code
-      - lutris
-      - spectacle
-      - remmina
-      - rsync
-      - kaccounts-providers
-      - firefox
-      - gamemode
-      - okular
+    name: "{{ arch_packages }}"
     state: present
     update_cache: true
 
@@ -99,17 +81,7 @@
 
 - name: Install common AUR packages
   kewlfft.aur.aur:
-    name:
-      - amf-amdgpu-pro
-      - steamtinkerlaunch
-      - obs-studio-amf
-      - mangohud
-      - lib32-mangohud
-      - gamemode
-      - obs-vkcapture-git
-      - lib32-obs-vkcapture-git
-      - 1password
-      - 1password-cli
+    name: "{{ arch_aur_packages }}"
     use: yay
     state: present
   become_user: aur_builder
@@ -156,14 +128,9 @@
 ### Install most-used Flatpaks
 
 - name: Install Desktop Flatpaks
+  become: true
   community.general.flatpak:
-    name:
-      - org.telegram.desktop
-      - tv.plex.PlexDesktop
-      - com.discordapp.Discord
-      - com.mattermost.Desktop
-      - us.zoom.Zoom
-      - com.mattjakeman.ExtensionManager
+    name: "{{ arch_flatpaks }}"
     state: present
     remote: flathub
 

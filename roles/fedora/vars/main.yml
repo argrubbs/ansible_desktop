@@ -1,0 +1,11 @@
+fedora_packages:
+  - python-pip
+  - tmux
+  - vim
+  - flatpak
+  - gnome-tweaks
+
+fedora_flatpaks:
+  - org.telegram.desktop
+  - com.discordapp.Discord
+  - com.spotify.Client

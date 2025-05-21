@@ -1,7 +1,14 @@
 - hosts: localhost
   connection: local
+  vars:
+    # Define distro variable with a default value or leave it undefined
+    # to be set via command line. If not set, it will default to 'arch'.
+    distro: "{{ distro | default('arch') }}"
   roles:
     - role: arch
+      when: distro == 'arch'
+    - role: fedora
+      when: distro == 'fedora'
     - role: petermosmans.customize-gnome
       vars:
         gnome_user: 'adam'
