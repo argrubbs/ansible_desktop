@@ -42,7 +42,7 @@
   ansible.builtin.find:
     paths: /etc/sudoers.d
     file_type: file
-    recurse: no
+    recurse: false
   register: unauthorized_sudoers_files
   become: true
 

@@ -1,6 +1,9 @@
-- name: Arch Desktop Setup
+- name: User Bootstrap
   hosts: localhost
   connection: local
+  pre_tasks:
+    - name: Ensure ansible_svc user exists and has sudoers
+      ansible.builtin.import_role:
+        name: user_management
   roles:
-    - user_management
-    - arch
+    - role: arch
