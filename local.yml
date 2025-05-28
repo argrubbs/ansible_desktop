@@ -2,13 +2,3 @@
   connection: local
   roles:
     - role: arch
-    - role: petermosmans.customize-gnome
-      vars:
-        gnome_user: 'adam'
-        gnome_extentions:
-          - url: 'https://github.com/ubuntu/gnome-shell-extension-appindicator/archive/refs/tags/v46.zip'
-            name: 'appindicators'
-            enabled: yes
-    - role: artis3n.tailscale
-      vars:
-        tailscale_authkey: "{{ lookup('env', 'TAILSCALE_KEY') }}"
