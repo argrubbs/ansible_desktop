@@ -1,14 +1,14 @@
 ---
 ### Enable ASUS tools
-- name: Enable asus-linux pacman repo
-  become: true
-  become_method: ansible.builtin.sudo
-  ansible.builtin.blockinfile:
-    path: "/etc/pacman.conf"
-    block: |
-      [g14]
-      SigLevel = DatabaseNever Optional TrustAll
-      Server = https://arch.asus-linux.org
+# - name: Enable asus-linux pacman repo
+#   become: true
+#   become_method: ansible.builtin.sudo
+#   ansible.builtin.blockinfile:
+#     path: "/etc/pacman.conf"
+#     block: |
+#       [g14]
+#       SigLevel = DatabaseNever Optional TrustAll
+#       Server = https://arch.asus-linux.org
 
 - name: Refresh pacman cache
   become: true
@@ -80,21 +80,21 @@
     state: present
     update_cache: true
 
-- name: Install asus-linux tools
-  become: true
-  become_method: ansible.builtin.sudo
-  community.general.pacman:
-    name: ["asusctl", "supergfxctl", "rog-control-center"]
-    state: present
+# - name: Install asus-linux tools
+#   become: true
+#   become_method: ansible.builtin.sudo
+#   community.general.pacman:
+#     name: ["asusctl", "supergfxctl", "rog-control-center"]
+#     state: present
 
-- name: Enable supergfxd
-  become: true
-  become_method: ansible.builtin.sudo
-  ansible.builtin.systemd:
-    name: "supergfxd"
-    state: started
-    daemon_reload: true
-    enabled: true
+# - name: Enable supergfxd
+#   become: true
+#   become_method: ansible.builtin.sudo
+#   ansible.builtin.systemd:
+#     name: "supergfxd"
+#     state: started
+#     daemon_reload: true
+#     enabled: true
 
 - name: Install common AUR packages
   kewlfft.aur.aur:
