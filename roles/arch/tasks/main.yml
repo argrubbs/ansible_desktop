@@ -111,6 +111,7 @@
       - 1password-cli
     use: yay
     state: present
+    extra_args: ['--noconfirm']
   become_user: aur_builder
   become: true
   become_method: ansible.builtin.sudo
