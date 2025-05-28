@@ -16,6 +16,30 @@
   community.general.pacman:
     update_cache: true
 
+- name: Ensure multilib repository is enabled - uncomment [multilib] section
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/pacman.conf
+    regexp: '^#\[multilib\]'
+    line: '[multilib]'
+    state: present
+    backup: yes # Recommended to create a backup before modifying system config files
+
+- name: Ensure multilib repository is enabled - uncomment Include line
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/pacman.conf
+    regexp: '^#Include = /etc/pacman.d/mirrorlist'
+    line: 'Include = /etc/pacman.d/mirrorlist'
+    state: present
+    insertafter: '^\[multilib\]' # Ensure this line is placed after the [multilib] section
+    backup: yes
+
+- name: Refresh pacman cache after enabling multilib
+  become: true
+  community.general.pacman:
+    update_cache: true
+
 - name: Create dev folder
   ansible.builtin.file:
     path: /home/adam/dev
