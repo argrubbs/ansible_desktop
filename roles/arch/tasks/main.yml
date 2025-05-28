@@ -10,6 +10,15 @@
 #       SigLevel = DatabaseNever Optional TrustAll
 #       Server = https://arch.asus-linux.org
 
+- name: Allow ansible-pull to run without password
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/10-ansible-pull
+    line: 'adam ALL=(ALL) NOPASSWD: /usr/bin/ansible-pull'
+    create: true
+    validate: 'visudo -cf %s'
+    mode: '0440'
+  become: true # This task needs to run with root privileges
+
 - name: Refresh pacman cache
   become: true
   become_method: ansible.builtin.sudo
