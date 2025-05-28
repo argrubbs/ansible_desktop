@@ -1,2 +1,2 @@
-ansible_user: adam
-ansible_become_pass: '<user_password_here>'
+ansible_user: "{{ lookup('env', 'USER') }}"
+ansible_become_pass: "{{ lookup('env','ANSIBLE_BECOME_PASS') }}"
