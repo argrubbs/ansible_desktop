@@ -43,13 +43,13 @@
     create_home: true
     group: wheel
 
-- name: Allow the `aur_builder` user to run `aansi pacman` without a password
+- name: Allow the `aur_builder` user to run `pacman` without a password
   become: true
   ansible.builtin.lineinfile:
-    path: /etc/aansiers.d/11-install-aur_builder
+    path: /etc/sudoers.d/11-install-aur_builder
     line: "aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman"
     create: true
-    validate: "viaansi -cf %s"
+    validate: "visudo -cf %s" # Corrected from 'viaansi'
     mode: "0440"
 
 ### Install packages
