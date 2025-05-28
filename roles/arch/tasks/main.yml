@@ -10,20 +10,12 @@
 #       SigLevel = DatabaseNever Optional TrustAll
 #       Server = https://arch.asus-linux.org
 
-- name: Allow ansible-pull to run without password
-  ansible.builtin.lineinfile:
-    path: /etc/sudoers.d/10-ansible-pull
-    line: 'adam ALL=(ALL) NOPASSWD: /usr/bin/ansible-pull'
-    create: true
-    validate: 'visudo -cf %s'
-    mode: '0440'
-  become: true # This task needs to run with root privileges
-
 - name: Refresh pacman cache
   become: true
   become_method: ansible.builtin.sudo
   community.general.pacman:
     update_cache: true
+
 
 - name: Ensure multilib repository is enabled - uncomment [multilib] section
   become: true
@@ -32,7 +24,7 @@
     regexp: '^#\[multilib\]'
     line: '[multilib]'
     state: present
-    backup: yes # Recommended to create a backup before modifying system config files
+    backup: true # Recommended to create a backup before modifying system config files
 
 - name: Ensure multilib repository is enabled - uncomment Include line
   become: true
@@ -42,7 +34,7 @@
     line: 'Include = /etc/pacman.d/mirrorlist'
     state: present
     insertafter: '^\[multilib\]' # Ensure this line is placed after the [multilib] section
-    backup: yes
+    backup: true
 
 - name: Refresh pacman cache after enabling multilib
   become: true
@@ -62,6 +54,7 @@
     repo: "https://aur.archlinux.org/yay.git"
     dest: "/home/adam/dev/yay"
     update: true
+    version: 'main'
 
 - name: Build and install yay
   ansible.builtin.command:

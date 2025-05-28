@@ -1,4 +1,6 @@
-- hosts: localhost
+- name: Arch Desktop Setup
+  hosts: localhost
   connection: local
   roles:
-    - role: arch
+    - user_management
+    - arch
